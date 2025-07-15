@@ -7,8 +7,18 @@ import matplotlib.pyplot as plt
 from scipy.spatial.transform import Rotation
 import sys
 
+def streamsHeating(t,sigma0,h,alpha):
+    """
+        t is in Myr
+        sigma0 is in km/s
+        h is dimensionless
+        alpha is dimensionless
+    """
+    return (sigma0^(1/alpha)+h*t/14000*(35)^(1/alpha))^alpha
+
+
 def compute(a):
-    return ak.cvAdaptiveKDE(a,kappa=0.0372,nu=0.0755).kde
+    return ak.cvAdaptiveKDE(a,nfolds=10,kappa=0.0372,nu=0.0755).kde
 
 
 def est_veldisp(kde, rot_matrix, x, y, z):
@@ -91,6 +101,16 @@ def plot_sigma():
     ax.plot(np.linspace(0,25*(TIMESTEPS-1),TIMESTEPS),sigmas)
     plt.savefig("sigmas_test.png")
 
+def plot_sigmas():
+    with open("sigmas.pickle","rb") as file:
+        sigmas = pickle.load(file)
+    with open("sigmas1.pickle","rb") as file:
+        sigmas1 = pickle.load(file)
+    ax = plt.axes()
+    ax.plot(np.linspace(0,25*(TIMESTEPS-1),TIMESTEPS),sigmas)
+    ax.plot(np.linspace(0,25*(TIMESTEPS-1),TIMESTEPS),sigmas1)
+    plt.savefig("sigmas_test.png")
+
 
 def test_draw():
     with open("kde.pickle","rb") as file:
@@ -104,8 +124,9 @@ def test_draw():
     plt.savefig("distribution.png")
 
 if __name__ == "__main__":
-    # main()
+    main()
     compute_sigma()
     # check_draw()
     plot_sigma()
+    # plot_sigmas()
     # test_draw()
